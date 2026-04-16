@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meridian Estates | Luxury Real Estate</title>
+  
+  <meta name="description" content="Meridian Estates - Curated luxury properties worldwide. Where architecture meets living.">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <style>
+    :root {
+      --bg: #080808;
+      --gold: #C9A84C;
+      --white: #FFFFFF;
+      --muted: #666666;
+      --card-bg: rgba(255,255,255,0.03);
+    }
+
+    * { box-sizing: border-box; }
+    body, html {
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg);
+      color: var(--white);
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+    }
+
+    h1, h2, h3, .bebas {
+      font-family: 'Bebas Neue', cursive;
+      font-weight: 400;
+    }
+
+    /* Loader */
+    #loader {
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background: var(--bg); z-index: 9999;
+      display: flex; justify-content: center; align-items: center;
+      text-align: center;
+    }
+
+    /* Navbar */
+    nav {
+      position: fixed; top: 0; left: 0; width: 100%;
+      padding: 25px 50px;
+      display: flex; justify-content: space-between; align-items: center;
+      z-index: 100; transition: all 0.4s ease;
+      background: transparent;
+    }
+    nav.scrolled {
+      background: rgba(8,8,8,0.85);
+      backdrop-filter: blur(12px);
+      padding: 15px 50px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .logo { color: var(--gold); font-size: 2rem; letter-spacing: 2px; }
+    .nav-links { display: flex; gap: 40px; }
+    .nav-links a {
+      color: var(--white); text-decoration: none; text-transform: uppercase;
+      letter-spacing: 3px; font-size: 11px; transition: color 0.3s;
+    }
+    .nav-links a:hover { color: var(--gold); }
+    .book-btn {
+      color: var(--gold); border: 1px solid var(--gold);
+      padding: 10px 20px; font-size: 11px; text-transform: uppercase;
+      letter-spacing: 2px; text-decoration: none; transition: all 0.3s;
+    }
+    .book-btn:hover { background: var(--gold); color: var(--bg); }
+
+    /* Hero */
+    .pin-wrap {
+      width: 100%; height: 100vh; position: relative; overflow: hidden;
+    }
+    #hero-canvas {
+      position: absolute; top: 0; left: 0;
+      width: 100%; height: 100%; display: block;
+    }
+    
+    .hero-content {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none; /* Let clicks pass to canvas if needed, or buttons */
+    }
+    
+    /* Make Phase 1 interactable */
+    #phase1 { pointer-events: auto; }
+
+    .btn-primary {
+      background: var(--gold); border: none; color: #080808;
+      padding: 15px 40px; font-family: 'Inter'; font-weight: 500;
+      text-transform: uppercase; letter-spacing: 1px; cursor: pointer;
+      transition: background 0.3s;
+    }
+    .btn-primary:hover { background: #fff; }
+    .btn-secondary {
+      background: rgba(255,255,255,0.05); border: 1px solid var(--white);
+      color: var(--white); padding: 15px 40px; font-family: 'Inter';
+      font-weight: 500; text-transform: uppercase; letter-spacing: 1px;
+      cursor: pointer; backdrop-filter: blur(5px);
+      transition: background 0.3s, color 0.3s;
+    }
+    .btn-secondary:hover { background: var(--white); color: #080808; }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(10px); }
+    }
+    .bounce { animation: bounce 2s infinite ease-in-out; }
+
+    /* Properties Section */
+    #properties { padding: 120px 10%; position: relative; z-index: 2; background: var(--bg); }
+    .section-label {
+      color: var(--gold); font-size: 11px; letter-spacing: 2px;
+      margin-bottom: 20px; display: flex; align-items: center;
+    }
+    .section-label .line {
+      width: 40px; height: 1px; background: var(--gold); margin-right: 15px;
+    }
+    .section-title { font-size: 5rem; margin: 0 0 50px 0; letter-spacing: 2px; }
+    .cards-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; }
+    .card {
+      background: var(--card-bg); border: 1px solid rgba(201,168,76,0.15);
+      border-radius: 4px; overflow: hidden; transition: all 0.4s ease;
+      opacity: 0; transform: translateY(40px); cursor: pointer;
+    }
+    .card:hover {
+      transform: translateY(-10px); border-color: rgba(201,168,76,0.6);
+      box-shadow: 0 20px 60px rgba(201,168,76,0.1);
+    }
+    .card-img { width: 100%; height: 280px; object-fit: cover; }
+    .card-content { padding: 30px; }
+    
+    /* Statement Parallax */
+    #statement {
+      height: 100vh; background: #080808; display: flex; flex-direction: column;
+      justify-content: center; position: relative; overflow: hidden; padding: 0 5%;
+    }
+    .line-left, .line-right { height: 1px; background: var(--gold); position: absolute; box-shadow: 0 0 15px rgba(201,168,76,0.8); }
+    .line-left { left: 0; top: 40%; width: 0; }
+    .line-right { right: 0; top: 60%; width: 0; }
+    .parallax-text { font-size: 10vw; white-space: nowrap; line-height: 1; text-transform: uppercase; }
+    .left-text { margin-left: -5%; color: rgba(255,255,255,0.9); }
+    .right-text { align-self: flex-end; margin-right: -5%; color: var(--gold); }
+
+    /* Contact Section */
+    .contact-section {
+      display: flex; min-height: 80vh; padding: 120px 10%; gap: 60px;
+    }
+    .contact-form input {
+      width: 100%; background: transparent; border: none;
+      border-bottom: 1px solid rgba(201,168,76,0.3); padding: 15px 0;
+      margin-bottom: 30px; color: var(--white); font-family: 'Inter', sans-serif;
+      font-size: 1rem; transition: border-color 0.3s ease;
+    }
+    .contact-form input:focus { outline: none; border-bottom-color: var(--gold); }
+    .contact-form input::placeholder { color: var(--muted); }
+    .contact-form button {
+      background: var(--gold); color: #080808; border: none;
+      padding: 15px 40px; font-family: 'Inter', sans-serif; font-weight: 500;
+      text-transform: uppercase; letter-spacing: 1px; cursor: pointer;
+      transition: background 0.3s ease; margin-top: 20px; width: 100%;
+    }
+    .contact-form button:hover { background: #fff; }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .cards-grid { grid-template-columns: repeat(2, 1fr); }
+      #hero-heading { font-size: 6rem !important; }
+    }
+    @media (max-width: 768px) {
+      .cards-grid { grid-template-columns: 1fr; }
+      .contact-section { flex-direction: column; }
+      #hero-heading { font-size: 4.5rem !important; }
+      #phase3-label { font-size: 2.5rem !important; }
+      .nav-links { display: none !important; }
+      nav { padding: 20px; }
+      nav.scrolled { padding: 15px 20px; }
+      #hero-buttons { flex-direction: column; }
+      .parallax-text { font-size: 14vw; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Preloader -->
+  <div id="loader">
+    <div class="loader-content">
+      <h1 class="bebas" style="color: var(--gold); font-size: 3rem; letter-spacing: 0.1em; margin-bottom: 20px;">MERIDIAN ESTATES</h1>
+      <div class="progress-bar-container" style="width: 300px; height: 1px; background: rgba(201,168,76,0.2); margin: 0 auto; position: relative;">
+        <div id="progress-bar" style="width: 0%; height: 100%; background: var(--gold); position: absolute; left: 0; top: 0;"></div>
+      </div>
+      <p id="progress-text" style="color: var(--muted); margin-top: 15px; font-size: 14px; letter-spacing: 1px;">Loading... 0%</p>
+    </div>
+  </div>
+
+  <!-- Navbar -->
+  <nav>
+    <div class="logo bebas">M|E</div>
+    <div class="nav-links">
+      <a href="#properties">Properties</a>
+      <a href="#statement">Experience</a>
+      <a href="#properties">About</a>
+      <a href="#contact">Contact</a>
+    </div>
+    <div class="nav-right">
+      <a href="#contact" class="book-btn">Book Viewing</a>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <div id="hero-container">
+    <div class="pin-wrap">
+      <canvas id="hero-canvas"></canvas>
+      <div id="hero-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.65); z-index: 1; pointer-events: none;"></div>
+      
+      <div class="hero-content">
+        <!-- Phase 1: Initial Overlay -->
+        <div id="phase1" style="position: absolute; width: 100%; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; z-index: 10; opacity: 0;">
+           <h1 id="hero-heading" class="bebas phase1-ui" style="font-size: 8rem; line-height: 0.9; margin: 0; text-shadow: 0 0 40px rgba(0,0,0,0.8); letter-spacing: 0.15em;">
+              MERIDIAN<br>ESTATES
+           </h1>
+           <p id="hero-subtext" class="phase1-ui" style="font-size: 1.5rem; font-weight: 300; margin: 20px 0; text-shadow: 0 0 20px rgba(0,0,0,0.5); color: rgba(255,255,255,0.8);">
+              Where Architecture Meets Living
+           </p>
+           <div id="hero-stats" class="phase1-ui" style="color: var(--gold); font-size: 0.8rem; letter-spacing: 3px; text-transform: uppercase; margin: 30px 0;">
+              500+ Properties · 12 Cities · $2B Sold
+           </div>
+           <div id="hero-buttons" class="phase1-ui" style="display: flex; gap: 20px; justify-content: center;">
+              <button class="btn-primary">Explore Properties</button>
+              <button class="btn-secondary">Our Story</button>
+           </div>
+        </div>
+        
+        <div id="scroll-indicator" class="phase1-ui" style="position: absolute; bottom: 40px; width: 100%; left: 0; text-align: center; color: var(--white); font-size: 0.8rem; letter-spacing: 2px; z-index: 10; opacity: 0;">
+           SCROLL TO EXPLORE<br>
+           <div class="bounce" style="margin-top: 10px;">↓</div>
+        </div>
+
+        <!-- Phase 3: Final Bridge Label -->
+        <div id="phase3" style="position: absolute; width: 100%; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; z-index: 5; opacity: 0;">
+           <h2 id="phase3-label" class="bebas" style="font-size: 4rem; letter-spacing: 0.3em; color: rgba(255,255,255,0.8); margin: 0;">WHERE ARCHITECTURE MEETS LIVING</h2>
+           <div class="phase3-line" style="width: 0px; height: 1px; background: var(--gold); margin: 20px auto 0;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Properties Section -->
+  <section id="properties">
+    <div class="section-label"><span class="line"></span> OUR COLLECTION</div>
+    <h2 class="section-title bebas">Curated Properties</h2>
+    
+    <div class="cards-grid">
+      <!-- Card 1 -->
+      <div class="card">
+        <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=600&q=80" alt="Penthouse" class="card-img" />
+        <div class="card-content">
+           <div style="color: var(--gold); font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 5px;">Penthouse, New York</div>
+           <div class="bebas" style="font-size: 2.5rem; margin-bottom: 15px;">$14,500,000</div>
+           <div style="display: flex; gap: 15px; color: var(--muted); font-size: 0.85rem; border-top: 1px solid rgba(255,255,255,0.1); border-bottom: 1px solid rgba(255,255,255,0.1); padding: 15px 0; margin-bottom: 20px;">
+              <span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: text-bottom; margin-right: 4px;"><path d="M3 6v14M21 6v14M3 14h18M5 14v-4a2 2 0 012-2h10a2 2 0 012 2v4"></path></svg> 4 Beds
+              </span>
+              <span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: text-bottom; margin-right: 4px;"><path d="M4 10h16v6a4 4 0 01-4 4H8a4 4 0 01-4-4v-6zM8 10V6a2 2 0 012-2h4a2 2 0 012 2v4"></path></svg> 5 Baths
+              </span>
+              <span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: text-bottom; margin-right: 4px;"><path d="M4 4h16v16H4zM4 10h16M10 4v16"></path></svg> 6,200 SqFt
+              </span>
+           </div>
+           <a href="#contact" style="color: var(--gold); text-decoration: none; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;">View Property &rarr;</a>
+        </div>
+      </div>
+      
+      <!-- Card 2 -->
+      <div class="card">
+        <img src="https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=600&q=80" alt="Villa" class="card-img" />
+        <div class="card-content">
+           <div style="color: var(--gold); font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 5px;">Villa, Beverly Hills</div>
+           <div class="bebas" style="font-size: 2.5rem; margin-bottom: 15px;">$22,000,000</div>
+           <div style="display: flex; gap: 15px; color: var(--muted); font-size: 0.85rem; border-top: 1px solid rgba(255,255,255,0.1); border-bottom: 1px solid rgba(255,255,255,0.1); padding: 15px 0; margin-bottom: 20px;">
+              <span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: text-bottom; margin-right: 4px;"><path d="M3 6v14M21 6v14M3 14h18M5 14v-4a2 2 0 012-2h10a2 2 0 012 2v4"></path></svg> 6 Beds
+              </span>
+              <span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: text-bottom; margin-right: 4px;"><path d="M4 10h16v6a4 4 0 01-4 4H8a4 4 0 01-4-4v-6zM8 10V6a2 2 0 012-2h4a2 2 0 012 2v4"></path></svg> 8 Baths
+              </span>
+              <span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: text-bottom; margin-right: 4px;"><path d="M4 4h16v16H4zM4 10h16M10 4v16"></path></svg> 12,000 SqFt
+              </span>
+           </div>
+           <a href="#contact" style="color: var(--gold); text-decoration: none; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;">View Property &rarr;</a>
+        </div>
+      </div>
+      
+      <!-- Card 3 -->
+      <div class="card">
+        <img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=600&q=80" alt="Apartment" class="card-img" />
+        <div class="card-content">
+           <div style="color: var(--gold); font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 5px;">Apartment, London</div>
+           <div class="bebas" style="font-size: 2.5rem; margin-bottom: 15px;">$8,900,000</div>
+           <div style="display: flex; gap: 15px; color: var(--muted); font-size: 0.85rem; border-top: 1px solid rgba(255,255,255,0.1); border-bottom: 1px solid rgba(255,255,255,0.1); padding: 15px 0; margin-bottom: 20px;">
+              <span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: text-bottom; margin-right: 4px;"><path d="M3 6v14M21 6v14M3 14h18M5 14v-4a2 2 0 012-2h10a2 2 0 012 2v4"></path></svg> 3 Beds
+              </span>
+              <span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: text-bottom; margin-right: 4px;"><path d="M4 10h16v6a4 4 0 01-4 4H8a4 4 0 01-4-4v-6zM8 10V6a2 2 0 012-2h4a2 2 0 012 2v4"></path></svg> 3 Baths
+              </span>
+              <span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: text-bottom; margin-right: 4px;"><path d="M4 4h16v16H4zM4 10h16M10 4v16"></path></svg> 4,100 SqFt
+              </span>
+           </div>
+           <a href="#contact" style="color: var(--gold); text-decoration: none; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;">View Property &rarr;</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Parallax Statement Section -->
+  <section id="statement">
+    <div class="line-left"></div>
+    <div class="line-right"></div>
+    
+    <div class="parallax-text bebas left-text">Every Space</div>
+    <div class="parallax-text bebas right-text">Tells A Story.</div>
+  </section>
+
+  <!-- Contact Section -->
+  <section id="contact" class="contact-section">
+    <div style="flex: 1; padding-right: 20px;">
+      <div class="section-label"><span class="line"></span> INQUIRE</div>
+      <h2 class="bebas" style="font-size: 4rem; margin-bottom: 30px;">Begin Your Journey</h2>
+      <p style="color: var(--muted); line-height: 1.8; margin-bottom: 50px; font-weight: 300;">Connect with our global advisors for private viewings and exclusive acquisitions.</p>
+      
+      <div style="margin-bottom: 30px;">
+        <div style="color: var(--gold); font-size: 1.2rem; margin-bottom: 10px; font-weight: 500;">+1 (800) 555-0199</div>
+        <div style="color: var(--gold); font-size: 1.2rem; font-weight: 500;">contact@meridian.estates</div>
+      </div>
+    </div>
+    
+    <div style="flex: 1.2;">
+      <form class="contact-form" onsubmit="event.preventDefault();">
+        <input type="text" placeholder="Full Name" required />
+        <input type="email" placeholder="Email Address" required />
+        <input type="text" placeholder="Desired City / Property" />
+        <button type="submit">Submit Inquiry</button>
+      </form>
+    </div>
+  </section>
+
+  <script>
+    gsap.registerPlugin(ScrollTrigger);
+
+    const frameCount = 240;
+    // Format frame index as 3 digits. e.g. 001, 002
+    const currentFrame = index => `./frames/ezgif-frame-${index.toString().padStart(3, '0')}.jpg`;
+
+    const canvas = document.getElementById("hero-canvas");
+    const ctx = canvas.getContext("2d");
+    const images = [];
+    const imageSeq = { frame: 0 };
+    let loadedImages = 0;
+
+    // Handle canvas resizing to fill screen without blur
+    function resizeCanvas() {
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = window.innerWidth * dpr;
+      canvas.height = window.innerHeight * dpr;
+      canvas.style.width = window.innerWidth + "px";
+      canvas.style.height = window.innerHeight + "px";
+      render();
+    }
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+
+    // Preload frames
+    for (let i = 1; i <= frameCount; i++) {
+      const img = new Image();
+      img.src = currentFrame(i);
+      img.onload = imageLoaded;
+      img.onerror = imageLoaded; // Ensures loader finishes even if an image is missing
+      images[i - 1] = img;
+    }
+
+    function imageLoaded() {
+      loadedImages++;
+      let progress = Math.round((loadedImages / frameCount) * 100);
+      document.getElementById("progress-bar").style.width = progress + "%";
+      document.getElementById("progress-text").innerText = `Loading... ${progress}%`;
+      
+      if (loadedImages === frameCount) {
+        gsap.to("#loader", {
+          autoAlpha: 0,
+          duration: 1,
+          delay: 0.2, // Small delay for effect
+          onComplete: initInteractions
+        });
+      }
+    }
+
+    // Object-fit: cover drawing function
+    function render() {
+      if(!images[imageSeq.frame]) return;
+      const img = images[imageSeq.frame];
+      if (!img.width) return; // Wait until decoded
+      
+      const canvasWidth = canvas.width;
+      const canvasHeight = canvas.height;
+      const scale = Math.max(canvasWidth / img.width, canvasHeight / img.height);
+      const renderWidth = img.width * scale;
+      const renderHeight = img.height * scale;
+      const x = (canvasWidth - renderWidth) / 2;
+      const y = (canvasHeight - renderHeight) / 2;
+      
+      ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+      ctx.drawImage(img, x, y, renderWidth, renderHeight);
+    }
+
+    // Launch animations when loader completes
+    function initInteractions() {
+      // First frame draw immediately
+      render();
+      
+      // Initially show #phase1 wrapper fully, then stagger animate children
+      gsap.set("#phase1", { opacity: 1 });
+      gsap.fromTo(".phase1-ui", 
+        { opacity: 0, y: 30 }, 
+        { opacity: 1, y: 0, duration: 1.5, stagger: 0.1, ease: "power2.inOut" }
+      );
+
+      // Hero Scroll Setup
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: "#hero-container",
+          pin: true,
+          start: "top top",
+          end: "+=300%",
+          scrub: 1.5
+        }
+      });
+
+      const totalFramesDur = frameCount - 1; // 239
+
+      // 1) Phase 1 Fades (Starts immediately as user scrolls)
+      // Focus on canvas by fading out overlay
+      tl.to("#hero-overlay", { opacity: 0, duration: 60, ease: "power2.inOut" }, 0);
+
+      // Scroll indicator hides fairly quickly
+      tl.to("#scroll-indicator", { opacity: 0, duration: 15 }, 0);
+      
+      // Subtext/stats/buttons fade first
+      tl.to("#hero-subtext, #hero-stats, #hero-buttons", { opacity: 0, duration: 40, ease: "power2.inOut" }, 0);
+      
+      // Heading fades slightly later
+      tl.to("#hero-heading", { opacity: 0, duration: 40, ease: "power2.inOut" }, 20);
+
+      // 2) Bind canvas image sequence to start AFTER fades complete
+      tl.to(imageSeq, {
+        frame: totalFramesDur,
+        snap: "frame",
+        ease: "none",
+        duration: totalFramesDur,
+        onUpdate: render
+      }, 60);
+
+      // 3) Phase 3 Final Label (Cinematic Bridge)
+      tl.to("#phase3", { opacity: 1, duration: 40, ease: "power2.inOut" }, 220);
+      tl.to(".phase3-line", { width: "200px", duration: 40, ease: "power2.inOut" }, 220);
+
+
+      // Card Fade-Ins on Scroll (Intersection Observer)
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if(entry.isIntersecting) {
+            gsap.to(entry.target, { opacity: 1, y: 0, duration: 1.2, ease: "power2.out" });
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.1 });
+      
+      document.querySelectorAll(".card").forEach(card => observer.observe(card));
+
+
+      // Parallax Text in Section 3
+      gsap.to(".left-text", {
+        xPercent: -20,
+        ease: "none",
+        scrollTrigger: {
+          trigger: "#statement",
+          start: "top bottom",
+          end: "bottom top",
+          scrub: 1.5
+        }
+      });
+      gsap.to(".right-text", {
+        xPercent: 20,
+        ease: "none",
+        scrollTrigger: {
+          trigger: "#statement",
+          start: "top bottom",
+          end: "bottom top",
+          scrub: 1.5
+        }
+      });
+      
+      // Parallax Lines
+      gsap.to(".line-left", {
+        width: "35%",
+        ease: "power2.out",
+        scrollTrigger: {
+          trigger: "#statement",
+          start: "20% bottom",
+          end: "center center",
+          scrub: 1.5
+        }
+      });
+      gsap.to(".line-right", {
+        width: "35%",
+        ease: "power2.out",
+        scrollTrigger: {
+          trigger: "#statement",
+          start: "20% bottom",
+          end: "center center",
+          scrub: 1.5
+        }
+      });
+    }
+
+    // Navbar Background Scroll Toggle
+    ScrollTrigger.create({
+      start: "top -50",
+      end: 99999,
+      toggleClass: { className: "scrolled", targets: "nav" }
+    });
+
+  </script>
+</body>
+</html>
